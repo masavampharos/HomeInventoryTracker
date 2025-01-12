@@ -20,10 +20,10 @@ app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
 # Configure MySQL connection
-mysql_user = 'masavampharos$default'  # PythonAnywhereのユーザー名にプレフィックスが必要
+mysql_user = 'masavampharos'  # PythonAnywhereのユーザー名
 mysql_password = os.environ.get('MYSQL_PASSWORD')
 mysql_host = 'masavampharos.mysql.pythonanywhere-services.com'
-mysql_database = 'masavampharos$default'  # データベース名にもプレフィックスが必要
+mysql_database = 'masavampharos$default'  # データベース名にはプレフィックスが必要
 
 # Set Flask configuration
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dev-key-please-change-in-production')
