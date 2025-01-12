@@ -20,10 +20,10 @@ app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
 # Configure MySQL connection
-mysql_user = 'masavampharos'  # PythonAnywhereのユーザー名
+mysql_user = os.environ.get('MYSQL_USER', 'masavampharos')  # PythonAnywhereのユーザー名
 mysql_password = os.environ.get('MYSQL_PASSWORD')
 mysql_host = 'masavampharos.mysql.pythonanywhere-services.com'
-mysql_database = 'masavampharos$default'  # データベース名にはプレフィックスが必要
+mysql_database = os.environ.get('MYSQL_DATABASE', 'masavampharos$default')  # データベース名
 
 # Set Flask configuration
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dev-key-please-change-in-production')
@@ -31,6 +31,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+mysqlconnector://{mysql_user}:{m
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 logger.info(f"Connecting to database at: {mysql_host}")
+logger.info(f"Using database: {mysql_database}")
+logger.info(f"Using user: {mysql_user}")
 
 # Initialize SQLAlchemy
 db = SQLAlchemy(app)
