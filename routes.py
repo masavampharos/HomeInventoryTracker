@@ -11,7 +11,7 @@ from datetime import datetime
 
 @app.route('/')
 def index():
-    items = Item.query.order_by(Item.order_index).all()
+    items = Item.query.order_by(Item.position).all()
     form = ItemForm()
     consumption_form = ConsumptionForm()
     items_to_restock = Item.query.filter(Item.current_stock <= Item.minimum_stock).all()
@@ -33,7 +33,7 @@ def add_item():
         return redirect(url_for('index'))
     
     # GETリクエストの場合は空のフォームを表示
-    items = Item.query.order_by(Item.order_index).all()
+    items = Item.query.order_by(Item.position).all()
     consumption_form = ConsumptionForm()
     return render_template('inventory.html', form=form, items=items, consumption_form=consumption_form)
 
@@ -41,7 +41,7 @@ def add_item():
 def edit_item(item_id):
     item = Item.query.get_or_404(item_id)
     form = ItemForm()
-    items = Item.query.order_by(Item.order_index).all()
+    items = Item.query.order_by(Item.position).all()
     
     if form.validate_on_submit():
         try:
@@ -140,7 +140,7 @@ def reorder_item(item_id):
             return jsonify({'success': False, 'error': 'New index is required'}), 400
             
         # Update all items' order
-        items = Item.query.order_by(Item.order_index).all()
+        items = Item.query.order_by(Item.position).all()
         item_to_move = next((item for item in items if item.id == item_id), None)
         
         if not item_to_move:
@@ -151,9 +151,9 @@ def reorder_item(item_id):
         # Insert item at new position
         items.insert(new_index, item_to_move)
         
-        # Update order_index for all items
+        # Update position for all items
         for i, item in enumerate(items):
-            item.order_index = i
+            item.position = i
             
         db.session.commit()
         return jsonify({'success': True})
