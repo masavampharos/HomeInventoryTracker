@@ -6,8 +6,8 @@ class Item(db.Model):
     name = db.Column(db.String(100), nullable=False)
     current_stock = db.Column(db.Integer, default=0)
     minimum_stock = db.Column(db.Integer, default=0)
-    image_url = db.Column(db.String(200))
-    order_index = db.Column(db.Integer, default=0)
+    image_url = db.Column(db.String(500))
+    position = db.Column(db.Integer, default=0)
     consumption_logs = db.relationship('ConsumptionLog', backref='item', lazy=True)
 
 class ConsumptionLog(db.Model):
