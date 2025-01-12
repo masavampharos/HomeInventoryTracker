@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="inventory-header fixed-top d-flex justify-content-between align-items-center px-3 py-2">
+    <h2 class="inventory-title mb-0">在庫管理</h2>
+    <div class="d-flex gap-1">
+        <button id="toggleLowStock" class="btn btn-icon btn-outline-primary" title="在庫切れのみ表示">
+            <i class="fas fa-filter"></i>
+        </button>
+        <button id="toggleMoveMode" class="btn btn-light">
+            Move
+        </button>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addItemModal">
+            Add
+        </button>
+    </div>
+</div>
+
+<div style="height: 40px;"></div> <!-- Spacer for fixed header -->
+
+<div class="inventory-list" id="sortableList">
+    <div class="inventory-header-row non-sortable">
+        <div class="item-name">商品名</div>
+        <div class="item-stock">在庫</div>
+        <div class="item-actions">操作</div>
+    </div>
+    {% for item in items %}
+    <div id="item-{{ item.id }}" class="inventory-row" data-category="{{ item.category }}">
+        <div class="item-name">
+            <div class="item-image-container">
+                {% if item.image_url %}
+                <img src="{{ item.image_url }}" alt="{{ item.name }}" class="item-image">
+                {% else %}
+                <i class="fas fa-{{ item.category|lower }}-alt category-icon"></i>
+                {% endif %}
+            </div>
+            <span class="item-name-text">{{ item.name }}</span>
+        </div>
+        <div class="item-stock {% if item.current_stock < item.minimum_stock %}low-stock{% endif %}"
+             data-minimum-stock="{{ item.minimum_stock }}"
+             {% if item.current_stock < item.minimum_stock %}
+             data-restock-message="あと{{ item.minimum_stock - item.current_stock }}個必要です"
+             {% endif %}>
+            <button class="btn-stock" onclick="updateStock({{ item.id }}, -1)" title="減らす" {% if item.current_stock <= 0 %}disabled{% endif %}>－</button>
+            <span class="stock-value">{{ item.current_stock }}</span>
+            <button class="btn-stock" onclick="updateStock({{ item.id }}, 1)" title="増やす">＋</button>
+        </div>
+        <div class="item-actions dropdown">
+            <button class="btn btn-icon dropdown-toggle" type="button" id="actionMenu{{ item.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-ellipsis-v"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="actionMenu{{ item.id }}">
+                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#editItemModal{{ item.id }}">
+                    <i class="fas fa-edit me-2"></i>編集
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" onclick="deleteItem({{ item.id }})">
+                    <i class="fas fa-trash me-2"></i>削除
+                </a></li>
+            </ul>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Add Item Modal -->
+<div class="modal fade drawer" id="addItemModal" tabindex="-1" aria-labelledby="addItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addItemModalLabel">新しいアイテムを追加</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('add_item') }}">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        <div id="imagePreview" class="text-center mb-3" style="display: none;">
+                            <img src="" alt="商品画像プレビュー" style="max-width: 200px; max-height: 200px;">
+                        </div>
+                        {{ form.image_url.label(class="form-label") }}
+                        {{ form.image_url(class="form-control", onchange="previewImage(this)") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control") }}
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            {{ form.current_stock.label(class="form-label") }}
+                            {{ form.current_stock(class="form-control") }}
+                        </div>
+                        <div class="col-6">
+                            {{ form.minimum_stock.label(class="form-label") }}
+                            {{ form.minimum_stock(class="form-control") }}
+                        </div>
+                    </div>
+                    {{ form.submit(class="btn btn-primary w-100") }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for item in items %}
+<!-- Edit Item Modal -->
+<div class="modal fade drawer" id="editItemModal{{ item.id }}" tabindex="-1" aria-labelledby="editItemModalLabel{{ item.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editItemModalLabel{{ item.id }}">アイテムを編集</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{{ url_for('edit_item', item_id=item.id) }}">
+                    {{ form.hidden_tag() }}
+                    <div class="mb-3">
+                        <div id="imagePreview{{ item.id }}" class="text-center mb-3" {% if item.image_url %}style="display: block;"{% else %}style="display: none;"{% endif %}>
+                            <img src="{{ item.image_url }}" alt="商品画像プレビュー" style="max-width: 200px; max-height: 200px;">
+                        </div>
+                        {{ form.image_url.label(class="form-label") }}
+                        {{ form.image_url(class="form-control", value=item.image_url, onchange="previewImage(this)") }}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.name.label(class="form-label") }}
+                        {{ form.name(class="form-control", value=item.name) }}
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-6">
+                            {{ form.current_stock.label(class="form-label") }}
+                            {{ form.current_stock(class="form-control", value=item.current_stock) }}
+                        </div>
+                        <div class="col-6">
+                            {{ form.minimum_stock.label(class="form-label") }}
+                            {{ form.minimum_stock(class="form-control", value=item.minimum_stock) }}
+                        </div>
+                    </div>
+                    {{ form.submit(class="btn btn-primary w-100") }}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,11 @@
+[2025-01-12 22:51:15 +0900] [96957] [INFO] Starting gunicorn 23.0.0
+[2025-01-12 22:51:15 +0900] [96957] [INFO] Listening at: http://127.0.0.1:8080 (96957)
+[2025-01-12 22:51:15 +0900] [96957] [INFO] Using worker: sync
+[2025-01-12 22:51:15 +0900] [96962] [INFO] Booting worker with pid: 96962
+[2025-01-12 22:51:15 +0900] [96963] [INFO] Booting worker with pid: 96963
+INFO:app:Using database URL: postgresql://postgres:postgres@localhost:5432/home_inventory
+INFO:app:Using database URL: postgresql://postgres:postgres@localhost:5432/home_inventory
+INFO:app:Database connection successful
+INFO:app:Database connection successful
+INFO:app:All database tables created successfully
+INFO:app:All database tables created successfully
