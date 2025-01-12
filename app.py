@@ -1,58 +1,53 @@
 import os
-import logging
-from flask import Flask
+from flask import Flask, render_template, redirect, url_for, flash, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from dotenv import load_dotenv
+from flask_session import Session
+from datetime import datetime
+import logging
 
-# Load environment variables
-load_dotenv()
-
-# Set up logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
-# Initialize Flask application
 app = Flask(__name__)
 
-# Configure database
-database_url = os.environ.get('DATABASE_URL', '')
-if not database_url:
-    database_url = f"postgresql://{os.environ.get('PGUSER')}:{os.environ.get('PGPASSWORD')}@{os.environ.get('PGHOST')}:{os.environ.get('PGPORT')}/{os.environ.get('PGDATABASE')}"
+# ログ設定
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-if database_url.startswith('postgres://'):
-    database_url = database_url.replace('postgres://', 'postgresql://', 1)
-
-# Configure session for production
+# セッション設定
 app.config['SESSION_TYPE'] = 'filesystem'
-app.config['PERMANENT_SESSION_LIFETIME'] = 1800  # 30 minutes
-app.config['SESSION_COOKIE_SECURE'] = False  # Changed to False for local development
-app.config['SESSION_COOKIE_HTTPONLY'] = True
-app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+Session(app)
 
-app.config.update(
-    SECRET_KEY=os.environ.get('FLASK_SECRET_KEY', 'dev-key'),
-    SQLALCHEMY_DATABASE_URI=database_url,
-    SQLALCHEMY_TRACK_MODIFICATIONS=False
-)
+# シークレットキーの設定
+app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', 'dev-key-please-change-in-production')
 
-logger.info(f"Using database URL: {database_url}")
+# MySQLデータベース設定
+mysql_user = 'masavampharos'
+mysql_password = os.getenv('MYSQL_PASSWORD')  # MySQLのパスワードを環境変数から取得
+mysql_host = 'masavampharos.mysql.pythonanywhere-services.com'
+mysql_database = 'masavampharos$default'
 
-# Initialize SQLAlchemy
+# データベースURLの構築
+SQLALCHEMY_DATABASE_URI = f"mysql://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_database}"
+app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# データベース接続のログ出力
+logger.info(f"Connecting to database at: {mysql_host}")
+
+# SQLAlchemyの初期化
 db = SQLAlchemy(app)
 
-# Import routes
+# モデルのインポート
+from models import Item, ConsumptionLog
+
+# ルートのインポート
 from routes import *
 
-# Initialize database tables
+# データベース初期化
 with app.app_context():
     try:
-        db.engine.connect()
-        logger.info("Database connection successful")
         db.create_all()
-        logger.info("All database tables created successfully")
+        logger.info("Database tables created successfully")
     except Exception as e:
-        logger.error(f"Database connection error: {str(e)}")
-        raise
+        logger.error(f"Error creating database tables: {e}")
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=8080, debug=True)
