@@ -24,8 +24,8 @@ mysql_password = os.getenv('MYSQL_PASSWORD')  # MySQLのパスワードを環境
 mysql_host = 'masavampharos.mysql.pythonanywhere-services.com'
 mysql_database = 'masavampharos$default'
 
-# データベースURLの構築
-SQLALCHEMY_DATABASE_URI = f"mysql://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_database}"
+# データベースURLの構築（mysql-connector-pythonを使用）
+SQLALCHEMY_DATABASE_URI = f"mysql+mysqlconnector://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_database}"
 app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
