@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configure logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
 # Initialize Flask app
@@ -29,6 +29,7 @@ mysql_database = os.environ.get('MYSQL_DATABASE', 'masavampharos$default')  # �
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dev-key-please-change-in-production')
 app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+mysqlconnector://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_database}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['DEBUG'] = False  # デバッグモードをオフに
 
 logger.info(f"Connecting to database at: {mysql_host}")
 logger.info(f"Using database: {mysql_database}")
@@ -40,9 +41,9 @@ db = SQLAlchemy(app)
 try:
     with app.app_context():
         db.create_all()
-    logger.info("Database tables created successfully")
+    logger.warning("Database tables created successfully")
 except Exception as e:
     logger.error(f"Error creating database tables: {str(e)}")
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(host='0.0.0.0', port=8080)
