@@ -1,22 +1,23 @@
 # Home Inventory Tracker
 
-家庭内の在庫管理を簡単に行うためのWebアプリケーションです。
+日用品の在庫管理をシンプルに行えるWebアプリケーション
 
 ## 機能
 
-- 在庫アイテムの追加・編集・削除
-- 在庫レベルの視覚的な管理
+- アイテムの追加、編集、削除
+- 在庫レベルの視覚的管理
 - 消費ログの記録
-- 最小在庫数の設定と警告
-- ドラッグ&ドロップによる並び替え
+- 最小在庫アラート
+- ドラッグ&ドロップでの並び替え
 
 ## 技術スタック
 
-- Backend: Python/Flask
-- Database: PostgreSQL
-- Frontend: HTML/CSS/JavaScript
+- バックエンド: Python/Flask
+- データベース: PostgreSQL (Supabase)
+- フロントエンド: HTML/CSS/JavaScript
+- デプロイ: Render.com
 
-## セットアップ手順
+## ローカルでの実行方法
 
 1. リポジトリのクローン:
 ```bash
@@ -35,28 +36,46 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-4. PostgreSQLのセットアップ:
-```bash
-createdb home_inventory
-```
-
-5. 環境変数の設定:
-`.env`ファイルを作成し、以下の内容を設定:
+4. 環境変数の設定:
+`.env`ファイルを作成し、以下の変数を設定:
 ```
 FLASK_SECRET_KEY=your-secret-key
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/home_inventory
-FLASK_DEBUG=1
+SUPABASE_URL=your-supabase-url
+SUPABASE_DB_PASSWORD=your-database-password
 ```
 
-6. アプリケーションの実行:
+5. アプリケーションの実行:
 ```bash
 python app.py
 ```
 
-## デプロイ
+## デプロイ手順
 
-PythonAnywhereでのデプロイ手順は[こちら](https://help.pythonanywhere.com/pages/Flask/)を参照してください。
+### Supabase設定
+
+1. Supabaseでプロジェクトを作成
+2. SQL Editorで以下のテーブルを作成:
+   - `item`: アイテム管理用テーブル
+   - `consumption_log`: 消費ログ用テーブル
+3. 接続情報を取得:
+   - Database URL
+   - Database Password
+
+### Render.com設定
+
+1. Render.comでアカウント作成
+2. 「New Web Service」を選択
+3. GitHubリポジトリを連携
+4. 環境変数を設定:
+   - `FLASK_SECRET_KEY`
+   - `SUPABASE_URL`
+   - `SUPABASE_DB_PASSWORD`
+5. デプロイを実行
+
+## デプロイ済みURL
+
+https://homeinventorytracker.onrender.com
 
 ## ライセンス
 
-このプロジェクトはMITライセンスの下で公開されています。 
+MIT License 
