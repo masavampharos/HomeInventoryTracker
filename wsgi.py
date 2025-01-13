@@ -1,14 +1,17 @@
 import os
 import sys
 
-# アプリケーションのパスを設定
-path = '/home/YOUR_USERNAME/HomeInventoryTracker'
+# プロジェクトのパスを追加
+path = '/home/masavampharos/HomeInventoryTracker'
 if path not in sys.path:
     sys.path.append(path)
 
-# アプリケーションインスタンスをインポート
-from app import app as application
+# 環境変数の設定
+os.environ['FLASK_SECRET_KEY'] = 'dev-key-please-change-in-production'
+os.environ['MYSQL_USER'] = 'masavampharos'
+os.environ['MYSQL_PASSWORD'] = 'ecm0nef*euq4vzx-BHE'
+os.environ['MYSQL_DATABASE'] = 'masavampharos$default'
 
-# 環境変数を設定
-os.environ['FLASK_ENV'] = 'production'
-os.environ['FLASK_DEBUG'] = '0' 
+# アプリケーションのインポート
+from app import app as application
+application.secret_key = os.environ['FLASK_SECRET_KEY'] 

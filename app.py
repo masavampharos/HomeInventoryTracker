@@ -1,49 +1,40 @@
 import os
-import logging
-from flask import Flask
+from dotenv import load_dotenv
+from flask import Flask, render_template, redirect, url_for, flash, request, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_session import Session
-from dotenv import load_dotenv
+import logging
 
-# Load environment variables
 load_dotenv()
 
-# Configure logging
+app = Flask(__name__)
+
+# ログ設定
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
-# Initialize Flask app
-app = Flask(__name__)
-
-# Configure session
+# セッション設定
 app.config['SESSION_TYPE'] = 'filesystem'
 Session(app)
 
-# Configure MySQL connection
-mysql_user = os.environ.get('MYSQL_USER', 'masavampharos')  # PythonAnywhereのユーザー名
-mysql_password = os.environ.get('MYSQL_PASSWORD')
-mysql_host = 'masavampharos.mysql.pythonanywhere-services.com'
-mysql_database = os.environ.get('MYSQL_DATABASE', 'masavampharos$default')  # データベース名
+# Supabase PostgreSQL接続設定
+SUPABASE_URL = os.environ.get('SUPABASE_URL')
+SUPABASE_DB_PASSWORD = os.environ.get('SUPABASE_DB_PASSWORD')
+DB_URL = f"postgresql://postgres:{SUPABASE_DB_PASSWORD}@db.{SUPABASE_URL.replace('https://', '')}/postgres"
 
-# Set Flask configuration
-app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dev-key-please-change-in-production')
-app.config['SQLALCHEMY_DATABASE_URI'] = f"mysql+mysqlconnector://{mysql_user}:{mysql_password}@{mysql_host}/{mysql_database}"
+app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['DEBUG'] = False  # デバッグモードをオフに
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'dev-key')
 
-logger.info(f"Connecting to database at: {mysql_host}")
-logger.info(f"Using database: {mysql_database}")
-logger.info(f"Using user: {mysql_user}")
-
-# Initialize SQLAlchemy
 db = SQLAlchemy(app)
 
-try:
-    with app.app_context():
-        db.create_all()
-    logger.warning("Database tables created successfully")
-except Exception as e:
-    logger.error(f"Error creating database tables: {str(e)}")
+# モデルのインポート
+from models import Item, ConsumptionLog
+
+# ルートのインポート
+from routes import *
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    with app.app_context():
+        db.create_all()
+    app.run(host='0.0.0.0', port=8080, debug=False)
