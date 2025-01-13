@@ -6,9 +6,9 @@ services:
     startCommand: gunicorn app:app
     envVars:
       - key: FLASK_SECRET_KEY
-        generateValue: true
-      - key: SUPABASE_URL
         sync: false
+      - key: SUPABASE_URL
+        value: https://iukitbrabanhmqodloeb.supabase.co
       - key: SUPABASE_DB_PASSWORD
         sync: false
-    plan: free 
+    autoDeploy: true 
